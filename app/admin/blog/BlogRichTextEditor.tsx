@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect } from "react";
@@ -12,10 +11,7 @@ type Props = {
   onChange: (value: string) => void;
 };
 
-export default function BlogRichTextEditor({
-  value,
-  onChange,
-}: Props) {
+export default function BlogRichTextEditor({ value, onChange }: Props) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -30,8 +26,21 @@ export default function BlogRichTextEditor({
     },
     editorProps: {
       attributes: {
-        class:
-          "min-h-[280px] px-4 py-3 outline-none focus:outline-none",
+        // Tailwind resets list/heading/bold styles, so style them explicitly
+        // so the editor shows formatting visually while typing.
+        class: [
+          "min-h-[280px] px-4 py-3 outline-none focus:outline-none text-gray-800",
+          "[&_h1]:mb-3 [&_h1]:mt-4 [&_h1]:text-3xl [&_h1]:font-bold",
+          "[&_h2]:mb-3 [&_h2]:mt-4 [&_h2]:text-2xl [&_h2]:font-bold",
+          "[&_h3]:mb-2 [&_h3]:mt-3 [&_h3]:text-xl [&_h3]:font-semibold",
+          "[&_p]:mb-3",
+          "[&_strong]:font-bold",
+          "[&_em]:italic",
+          "[&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-6",
+          "[&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-6",
+          "[&_li]:mb-1",
+          "[&_a]:text-blue-600 [&_a]:underline",
+        ].join(" "),
       },
     },
   });
@@ -58,47 +67,45 @@ export default function BlogRichTextEditor({
         : "bg-white text-gray-700 hover:bg-gray-100"
     }`;
 
-  
-function addLink() {
-  const activeEditor = editor;
-  if (!activeEditor) return;
+  function addLink() {
+    const activeEditor = editor;
+    if (!activeEditor) return;
 
-  const url = window.prompt(
-    "Enter a link URL:",
-    activeEditor.getAttributes("link").href || "",
-  );
+    const url = window.prompt(
+      "Enter a link URL:",
+      activeEditor.getAttributes("link").href || "",
+    );
 
-  if (url === null) return;
+    if (url === null) return;
 
-  if (url.trim() === "") {
-    activeEditor
-      .chain()
-      .focus()
-      .extendMarkRange("link")
-      .unsetLink()
-      .run();
-    return;
-  }
-
-  try {
-    const parsed = new URL(url.trim());
-
-    if (!["http:", "https:", "mailto:"].includes(parsed.protocol)) {
-      window.alert("Enter a valid HTTP, HTTPS, or email URL.");
+    if (url.trim() === "") {
+      activeEditor
+        .chain()
+        .focus()
+        .extendMarkRange("link")
+        .unsetLink()
+        .run();
       return;
     }
 
-    activeEditor
-      .chain()
-      .focus()
-      .extendMarkRange("link")
-      .setLink({ href: parsed.href })
-      .run();
-  } catch {
-    window.alert("Enter a valid URL, including https://");
-  }
-}
+    try {
+      const parsed = new URL(url.trim());
 
+      if (!["http:", "https:", "mailto:"].includes(parsed.protocol)) {
+        window.alert("Enter a valid HTTP, HTTPS, or email URL.");
+        return;
+      }
+
+      activeEditor
+        .chain()
+        .focus()
+        .extendMarkRange("link")
+        .setLink({ href: parsed.href })
+        .run();
+    } catch {
+      window.alert("Enter a valid URL, including https://");
+    }
+  }
 
   const toolbarButton = (
     label: string,
@@ -119,14 +126,40 @@ function addLink() {
   return (
     <div className="mt-2 overflow-hidden rounded-lg border border-gray-300 bg-white">
       <div className="flex flex-wrap gap-2 border-b bg-gray-50 p-3">
-        {toolbarButton("B", () => editor.chain().focus().toggleBold().run(), editor.isActive("bold"))}
-        {toolbarButton("I", () => editor.chain().focus().toggleItalic().run(), editor.isActive("italic"))}
-        {toolbarButton("Heading 1", () => editor.chain().focus().toggleHeading({ level: 1 }).run(), editor.isActive("heading", { level: 1 }))}
-        {toolbarButton("Heading 2", () => editor.chain().focus().toggleHeading({ level: 2 }).run(), editor.isActive("heading", { level: 2 }))}
-        {toolbarButton("Bullet list", () => editor.chain().focus().toggleBulletList().run(), editor.isActive("bulletList"))}
-        {toolbarButton("Numbered list", () => editor.chain().focus().toggleOrderedList().run(), editor.isActive("orderedList"))}
+        {toolbarButton(
+          "B",
+          () => editor.chain().focus().toggleBold().run(),
+          editor.isActive("bold"),
+        )}
+        {toolbarButton(
+          "I",
+          () => editor.chain().focus().toggleItalic().run(),
+          editor.isActive("italic"),
+        )}
+        {toolbarButton(
+          "Heading 1",
+          () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
+          editor.isActive("heading", { level: 1 }),
+        )}
+        {toolbarButton(
+          "Heading 2",
+          () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
+          editor.isActive("heading", { level: 2 }),
+        )}
+        {toolbarButton(
+          "Bullet list",
+          () => editor.chain().focus().toggleBulletList().run(),
+          editor.isActive("bulletList"),
+        )}
+        {toolbarButton(
+          "Numbered list",
+          () => editor.chain().focus().toggleOrderedList().run(),
+          editor.isActive("orderedList"),
+        )}
         {toolbarButton("Link", addLink, editor.isActive("link"))}
-        {toolbarButton("Clear formatting", () => editor.chain().focus().unsetAllMarks().run())}
+        {toolbarButton("Clear formatting", () =>
+          editor.chain().focus().unsetAllMarks().run(),
+        )}
       </div>
 
       <EditorContent editor={editor} />
