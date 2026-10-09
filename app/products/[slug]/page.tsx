@@ -150,7 +150,7 @@ export default async function ProductPage({
 
               <a
                 href={`https://wa.me/918509158655?text=${encodeURIComponent(
-                  `Hello SONIA FURNITURE, I am interested in ${product.name}. Price: ₹${Number(product.basePrice).toLocaleString("en-IN")}. Product link: ${`http://localhost:3000/products/${product.slug}`}. Please share more details.`
+                  `Hello SONIA FURNITURE, I am interested in ${product.name}. Price: ₹${Number(product.basePrice).toLocaleString("en-IN")}. Product link: ${`https://sonia-furniture-frontend-k9ue.vercel.app/products/${product.slug}`}. Please share more details.`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
