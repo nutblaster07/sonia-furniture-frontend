@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -18,6 +17,7 @@ type BlogPost = {
   authorName?: string | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
+  seoKeywords?: string | null;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   isFeatured: boolean;
   publishedAt?: string | null;
@@ -38,6 +38,7 @@ const emptyForm = {
   authorName: "SONIA FURNITURE",
   seoTitle: "",
   seoDescription: "",
+  seoKeywords: "",
   status: "DRAFT" as BlogPost["status"],
   isFeatured: false,
   publishedAt: "",
@@ -118,6 +119,7 @@ export default function AdminBlogPage() {
       authorName: post.authorName ?? "SONIA FURNITURE",
       seoTitle: post.seoTitle ?? "",
       seoDescription: post.seoDescription ?? "",
+      seoKeywords: post.seoKeywords ?? "",
       status: post.status,
       isFeatured: post.isFeatured,
       publishedAt: post.publishedAt
@@ -155,6 +157,7 @@ export default function AdminBlogPage() {
         authorName: form.authorName || undefined,
         seoTitle: form.seoTitle || undefined,
         seoDescription: form.seoDescription || undefined,
+        seoKeywords: form.seoKeywords.trim() || undefined,
         categoryId: form.categoryId || undefined,
         publishedAt: form.publishedAt
           ? new Date(form.publishedAt).toISOString()
@@ -335,17 +338,15 @@ export default function AdminBlogPage() {
                 />
               </label>
 
-            
-              
-            <label className="text-sm font-medium text-gray-700 md:col-span-2">
-            Blog content *
-            <BlogRichTextEditor
-                value={form.content}
-                onChange={(value) => updateField("content", value)}
-            />
-            </label>
-       
-
+              {/* Use a div (not a label) so clicking inside the editor
+                  doesn't trigger the first toolbar button. */}
+              <div className="text-sm font-medium text-gray-700 md:col-span-2">
+                <span>Blog content *</span>
+                <BlogRichTextEditor
+                  value={form.content}
+                  onChange={(value) => updateField("content", value)}
+                />
+              </div>
 
               <label className="text-sm font-medium text-gray-700 md:col-span-2">
                 Featured image URL
@@ -358,14 +359,29 @@ export default function AdminBlogPage() {
                 />
               </label>
 
+              {/* ---------- SEO settings ---------- */}
+              <div className="md:col-span-2">
+                <h3 className="border-t border-gray-200 pt-5 text-base font-semibold text-gray-900">
+                  SEO Settings
+                </h3>
+                <p className="mt-1 text-xs text-gray-500">
+                  Helps this article rank on Google for Siliguri and nearby
+                  areas.
+                </p>
+              </div>
+
               <label className="text-sm font-medium text-gray-700">
                 SEO title
                 <input
                   value={form.seoTitle}
                   onChange={(e) => updateField("seoTitle", e.target.value)}
                   maxLength={70}
+                  placeholder="How to Choose the Right Sofa | Furniture Shop in Siliguri"
                   className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-3"
                 />
+                <span className="mt-1 block text-xs font-normal text-gray-500">
+                  {form.seoTitle.length}/70 (best under 60)
+                </span>
               </label>
 
               <label className="text-sm font-medium text-gray-700">
@@ -379,14 +395,33 @@ export default function AdminBlogPage() {
               </label>
 
               <label className="text-sm font-medium text-gray-700 md:col-span-2">
+                SEO keywords (separate with commas)
+                <input
+                  value={form.seoKeywords}
+                  onChange={(e) => updateField("seoKeywords", e.target.value)}
+                  placeholder="sofa in Siliguri, furniture shop Siliguri, furniture Jalpaiguri, furniture Darjeeling"
+                  className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-3"
+                />
+                <span className="mt-1 block text-xs font-normal text-gray-500">
+                  Nearby-area keywords (Siliguri, Matigara, Jalpaiguri,
+                  Darjeeling, Kalimpong, Cooch Behar) are added automatically
+                  on the public page.
+                </span>
+              </label>
+
+              <label className="text-sm font-medium text-gray-700 md:col-span-2">
                 SEO meta description
                 <textarea
                   rows={3}
                   maxLength={160}
                   value={form.seoDescription}
                   onChange={(e) => updateField("seoDescription", e.target.value)}
+                  placeholder="Planning to buy a sofa in Siliguri? Learn how to pick the right size, material and style. Visit SONIA FURNITURE."
                   className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-3"
                 />
+                <span className="mt-1 block text-xs font-normal text-gray-500">
+                  {form.seoDescription.length}/160
+                </span>
               </label>
 
               <label className="text-sm font-medium text-gray-700">

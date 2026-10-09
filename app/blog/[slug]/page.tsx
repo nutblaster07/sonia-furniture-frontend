@@ -12,9 +12,7 @@ interface BlogPageProps {
 async function getPost(slug: string) {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/blog/posts/slug/${slug}`,
-    {
-      cache: "no-store",
-    },
+    { cache: "no-store" },
   );
 
   if (!response.ok) {
@@ -24,6 +22,47 @@ async function getPost(slug: string) {
   return response.json();
 }
 
+// Set NEXT_PUBLIC_SITE_URL in .env, e.g. https://www.yourdomain.com
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.yourdomain.com"
+).replace(/\/$/, "");
+
+const BRAND = "SONIA FURNITURE";
+
+// Local SEO keywords: Siliguri and nearby areas of North Bengal
+const LOCAL_KEYWORDS = [
+  "furniture shop in Siliguri",
+  "furniture store Siliguri",
+  "best furniture shop in Siliguri",
+  "sofa set price in Siliguri",
+  "bed and wardrobe Siliguri",
+  "home furniture Siliguri",
+  "furniture near Sevoke Road",
+  "furniture Matigara",
+  "furniture Jalpaiguri",
+  "furniture Darjeeling",
+  "furniture Kalimpong",
+  "furniture Cooch Behar",
+  "furniture North Bengal",
+  "SONIA FURNITURE Siliguri",
+];
+
+const AREAS_SERVED = [
+  "Siliguri",
+  "Matigara",
+  "Sevoke Road",
+  "Jalpaiguri",
+  "Darjeeling",
+  "Kalimpong",
+  "Cooch Behar",
+  "North Bengal",
+];
+
+const DEFAULT_DESCRIPTION =
+  "Furniture buying guides and design ideas from SONIA FURNITURE, " +
+  "Siliguri. Serving Siliguri, Jalpaiguri, Darjeeling, Kalimpong " +
+  "and Cooch Behar.";
+
 export async function generateMetadata({
   params,
 }: BlogPageProps): Promise<Metadata> {
@@ -32,12 +71,50 @@ export async function generateMetadata({
 
   if (!post) return { title: "Article Not Found" };
 
+  const url = `${SITE_URL}/blog/${slug}`;
+  const title = post.seoTitle || `${post.title} | ${BRAND} Siliguri`;
+  const description =
+    post.seoDescription || post.excerpt || DEFAULT_DESCRIPTION;
+
+  const postKeywords: string[] = post.seoKeywords
+    ? String(post.seoKeywords)
+        .split(",")
+        .map((k: string) => k.trim())
+        .filter(Boolean)
+    : [];
+
   return {
-    title: `${post.title} | SONIA Journal`,
-    description: post.excerpt || undefined,
+    title,
+    description,
+    keywords: [...postKeywords, ...LOCAL_KEYWORDS],
+    authors: [{ name: post.authorName || BRAND }],
+    alternates: { canonical: url },
+    robots: { index: true, follow: true },
     openGraph: {
-      title: post.title,
-      description: post.excerpt || undefined,
+      type: "article",
+      url,
+      title,
+      description,
+      siteName: `${BRAND} Siliguri`,
+      locale: "en_IN",
+      publishedTime: post.publishedAt || undefined,
+      modifiedTime: post.updatedAt || post.publishedAt || undefined,
+      authors: [post.authorName || BRAND],
+      images: post.featuredImage
+        ? [
+            {
+              url: post.featuredImage,
+              width: 1200,
+              height: 630,
+              alt: `${post.title} - ${BRAND} Siliguri`,
+            },
+          ]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
       images: post.featuredImage ? [post.featuredImage] : undefined,
     },
   };
@@ -52,19 +129,30 @@ function getReadingTime(text: string) {
 const markdownComponents: Components = {
   h1: ({ node, ...props }) => (
     <h2
-      className="mb-5 mt-14 font-serif text-3xl font-bold leading-tight tracking-tight text-gray-900 md:text-4xl"
+      className={[
+        "mb-5 mt-14 font-serif text-3xl font-bold",
+        "leading-tight tracking-tight text-gray-900 md:text-4xl",
+      ].join(" ")}
       {...props}
     />
   ),
   h2: ({ node, ...props }) => (
     <h2
-      className="mb-5 mt-14 border-t border-gray-200 pt-10 font-serif text-2xl font-bold leading-snug tracking-tight text-gray-900 first:mt-0 first:border-0 first:pt-0 md:text-3xl"
+      className={[
+        "mb-5 mt-14 border-t border-gray-200 pt-10",
+        "font-serif text-2xl font-bold leading-snug",
+        "tracking-tight text-gray-900",
+        "first:mt-0 first:border-0 first:pt-0 md:text-3xl",
+      ].join(" ")}
       {...props}
     />
   ),
   h3: ({ node, ...props }) => (
     <h3
-      className="mb-3 mt-9 font-serif text-xl font-bold text-gray-900 md:text-2xl"
+      className={[
+        "mb-3 mt-9 font-serif text-xl font-bold",
+        "text-gray-900 md:text-2xl",
+      ].join(" ")}
       {...props}
     />
   ),
@@ -75,20 +163,30 @@ const markdownComponents: Components = {
   em: ({ node, ...props }) => <em className="italic" {...props} />,
   ul: ({ node, ...props }) => (
     <ul
-      className="mb-7 list-disc space-y-3 pl-6 marker:text-amber-600"
+      className={[
+        "mb-7 list-disc space-y-3 pl-6",
+        "marker:text-amber-600",
+      ].join(" ")}
       {...props}
     />
   ),
   ol: ({ node, ...props }) => (
     <ol
-      className="mb-7 list-decimal space-y-3 pl-6 marker:font-semibold marker:text-amber-700"
+      className={[
+        "mb-7 list-decimal space-y-3 pl-6",
+        "marker:font-semibold marker:text-amber-700",
+      ].join(" ")}
       {...props}
     />
   ),
   li: ({ node, ...props }) => <li className="pl-1" {...props} />,
   a: ({ node, ...props }) => (
     <a
-      className="font-medium text-amber-700 underline decoration-amber-300 underline-offset-4 transition hover:decoration-amber-700"
+      className={[
+        "font-medium text-amber-700 underline",
+        "decoration-amber-300 underline-offset-4",
+        "transition hover:decoration-amber-700",
+      ].join(" ")}
       target="_blank"
       rel="noopener noreferrer"
       {...props}
@@ -96,7 +194,10 @@ const markdownComponents: Components = {
   ),
   blockquote: ({ node, ...props }) => (
     <blockquote
-      className="my-8 rounded-r-xl border-l-4 border-amber-500 bg-amber-50 px-6 py-4 font-serif text-xl italic leading-8 text-gray-800"
+      className={[
+        "my-8 rounded-r-xl border-l-4 border-amber-500 bg-amber-50",
+        "px-6 py-4 font-serif text-xl italic leading-8 text-gray-800",
+      ].join(" ")}
       {...props}
     />
   ),
@@ -109,7 +210,10 @@ const markdownComponents: Components = {
   ),
   code: ({ node, ...props }) => (
     <code
-      className="rounded bg-gray-100 px-1.5 py-0.5 text-[0.9em] text-gray-800"
+      className={[
+        "rounded bg-gray-100 px-1.5 py-0.5",
+        "text-[0.9em] text-gray-800",
+      ].join(" ")}
       {...props}
     />
   ),
@@ -134,7 +238,11 @@ export default async function BlogPostPage({ params }: BlogPageProps) {
 
           <a
             href="/blog"
-            className="mt-6 inline-block rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-gray-700"
+            className={[
+              "mt-6 inline-block rounded-full bg-gray-900 px-6 py-3",
+              "text-sm font-semibold text-white transition",
+              "hover:bg-gray-700",
+            ].join(" ")}
           >
             Back to Blog
           </a>
@@ -146,27 +254,77 @@ export default async function BlogPostPage({ params }: BlogPageProps) {
   const readingTime = getReadingTime(post.content);
   const authorName = post.authorName || "SONIA FURNITURE";
 
+  // Structured data for Google (article + local business in Siliguri)
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.seoDescription || post.excerpt || undefined,
+    image: post.featuredImage ? [post.featuredImage] : undefined,
+    datePublished: post.publishedAt || undefined,
+    dateModified: post.updatedAt || post.publishedAt || undefined,
+    mainEntityOfPage: `${SITE_URL}/blog/${slug}`,
+    inLanguage: "en-IN",
+    author: { "@type": "Organization", name: authorName },
+    publisher: {
+      "@type": "FurnitureStore",
+      name: BRAND,
+      url: SITE_URL,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Siliguri",
+        addressRegion: "West Bengal",
+        addressCountry: "IN",
+      },
+      areaServed: AREAS_SERVED.map((name) => ({
+        "@type": "City",
+        name,
+      })),
+    },
+  };
+
   return (
     <main className="min-h-screen bg-white text-gray-900">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+
       {/* Article Header */}
       <header className="bg-gradient-to-b from-stone-50 to-white">
         <div className="mx-auto max-w-3xl px-6 pb-10 pt-12 md:pt-16">
           <a
             href="/blog"
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-gray-900"
+            className={[
+              "inline-flex items-center gap-2 text-sm font-medium",
+              "text-gray-500 transition hover:text-gray-900",
+            ].join(" ")}
           >
             <span aria-hidden>←</span> All Articles
           </a>
 
           {post.category?.name && (
             <p className="mt-8">
-              <span className="inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-amber-800">
+              <span
+                className={[
+                  "inline-block rounded-full bg-amber-100 px-3 py-1",
+                  "text-xs font-semibold uppercase tracking-wider",
+                  "text-amber-800",
+                ].join(" ")}
+              >
                 {post.category.name}
               </span>
             </p>
           )}
 
-          <h1 className="mt-5 font-serif text-4xl font-bold leading-[1.15] tracking-tight text-gray-900 md:text-5xl">
+          <h1
+            className={[
+              "mt-5 font-serif text-4xl font-bold leading-[1.15]",
+              "tracking-tight text-gray-900 md:text-5xl",
+            ].join(" ")}
+          >
             {post.title}
           </h1>
 
@@ -176,8 +334,18 @@ export default async function BlogPostPage({ params }: BlogPageProps) {
             </p>
           )}
 
-          <div className="mt-8 flex items-center gap-4 border-t border-gray-200 pt-6">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-900 text-sm font-bold text-white">
+          <div
+            className={[
+              "mt-8 flex items-center gap-4",
+              "border-t border-gray-200 pt-6",
+            ].join(" ")}
+          >
+            <div
+              className={[
+                "flex h-11 w-11 items-center justify-center",
+                "rounded-full bg-gray-900 text-sm font-bold text-white",
+              ].join(" ")}
+            >
               {authorName.charAt(0).toUpperCase()}
             </div>
 
@@ -201,7 +369,12 @@ export default async function BlogPostPage({ params }: BlogPageProps) {
       {/* Featured Image */}
       {post.featuredImage && (
         <div className="mx-auto max-w-5xl px-6 pb-4 pt-2">
-          <div className="aspect-[16/8] overflow-hidden rounded-3xl bg-gray-100 shadow-xl shadow-gray-200">
+          <div
+            className={[
+              "aspect-[16/8] overflow-hidden rounded-3xl bg-gray-100",
+              "shadow-xl shadow-gray-200",
+            ].join(" ")}
+          >
             <img
               src={post.featuredImage}
               alt={post.title}
@@ -223,8 +396,18 @@ export default async function BlogPostPage({ params }: BlogPageProps) {
         </div>
 
         {/* Call to action */}
-        <div className="mt-16 rounded-3xl bg-gray-900 px-8 py-10 text-center text-white">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400">
+        <div
+          className={[
+            "mt-16 rounded-3xl bg-gray-900 px-8 py-10",
+            "text-center text-white",
+          ].join(" ")}
+        >
+          <p
+            className={[
+              "text-xs font-semibold uppercase",
+              "tracking-[0.2em] text-amber-400",
+            ].join(" ")}
+          >
             SONIA FURNITURE
           </p>
 
@@ -239,16 +422,28 @@ export default async function BlogPostPage({ params }: BlogPageProps) {
 
           <a
             href="/"
-            className="mt-6 inline-block rounded-full bg-white px-7 py-3 text-sm font-semibold text-gray-900 transition hover:bg-amber-100"
+            className={[
+              "mt-6 inline-block rounded-full bg-white px-7 py-3",
+              "text-sm font-semibold text-gray-900 transition",
+              "hover:bg-amber-100",
+            ].join(" ")}
           >
             Explore Our Collection
           </a>
         </div>
 
-        <div className="mt-12 flex items-center justify-between border-t border-gray-200 pt-8">
+        <div
+          className={[
+            "mt-12 flex items-center justify-between",
+            "border-t border-gray-200 pt-8",
+          ].join(" ")}
+        >
           <a
             href="/blog"
-            className="text-sm font-semibold text-gray-900 underline underline-offset-4 hover:text-amber-700"
+            className={[
+              "text-sm font-semibold text-gray-900 underline",
+              "underline-offset-4 hover:text-amber-700",
+            ].join(" ")}
           >
             ← Back to Blog
           </a>
